@@ -3593,7 +3593,7 @@ void hif_wlan_disable(struct hif_softc *scn)
 int hif_get_wake_ce_id(struct hif_softc *scn, uint8_t *ce_id)
 {
 	QDF_STATUS status;
-	uint8_t ul_pipe, dl_pipe;
+	uint8_t ul_pipe, dl_pipe = 0;
 	int ul_is_polled, dl_is_polled;
 
 	/* DL pipe for HTC_CTRL_RSVD_SVC should map to the wake CE */
