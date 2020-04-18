@@ -917,11 +917,22 @@ void tick_broadcast(const struct cpumask *mask)
 }
 #endif
 
+/*
+ * The number of CPUs active, not counting this CPU (which may not be
+ * fully active and so not counted in num_active_cpus()).
+ */
+static inline unsigned int num_other_active_cpus(void)
+{
+	unsigned int this_cpu_active = cpu_active(smp_processor_id());
+
+	return num_active_cpus() - this_cpu_active;
+}
+
 void smp_send_stop(void)
 {
 	unsigned long timeout;
 
-	if (num_online_cpus() > 1) {
+	if (num_other_active_cpus()) {
 		cpumask_t mask;
 
 		cpumask_copy(&mask, cpu_online_mask);
@@ -932,10 +943,10 @@ void smp_send_stop(void)
 
 	/* Wait up to one second for other CPUs to stop */
 	timeout = USEC_PER_SEC;
-	while (num_active_cpus() > 1 && timeout--)
+	while (num_other_active_cpus() && timeout--)
 		udelay(1);
 
-	if (num_active_cpus() > 1)
+	if (num_other_active_cpus())
 		pr_warning("SMP: failed to stop secondary CPUs\n");
 }
 
